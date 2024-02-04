@@ -73,10 +73,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     const insertedExercise = await exercise.findOne({
       _id: newExercise.insertedId,
     });
-    res.status(200).json({
-      user: result,
-      exercise: insertedExercise,
-    });
+    res.status(200).json(insertedExercise);
   } else {
     return res
       .status(404)
