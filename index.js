@@ -59,8 +59,8 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
   });
   if (result) {
     const date = !req?.body?.date
-      ? new Date().toISOString().split("T")[0]
-      : new Date(req.body.date).toISOString().split("T")[0];
+      ? new Date().toDateString()
+      : new Date(req.body.date).toDateString();
     const newExercise = await exercise.insertOne(
       {
         username: result.username,
