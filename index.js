@@ -61,14 +61,21 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     const date = !req?.body?.date
       ? new Date().toISOString().split("T")[0]
       : new Date(req.body.date).toISOString().split("T");
-    const newExercise = exercise.insertOne({
-      username: result.username,
-      description: req.body.description,
-      duration: req.body.duration,
-      date,
+    const newExercise = await exercise.insertOne(
+      {
+        username: result.username,
+        description: req.body.description,
+        duration: req.body.duration,
+        date,
+      },
+      { returnOriginal: true }
+    );
+    const insertedExercise = await exercise.findOne({
+      _id: newExercise.insertedId,
     });
     res.status(200).json({
-      message: `Exercise with id ${newExercise._id} created successfully`,
+      user: result,
+      exercise: insertedExercise,
     });
   } else {
     return res
