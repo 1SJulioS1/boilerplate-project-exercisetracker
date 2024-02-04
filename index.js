@@ -47,6 +47,11 @@ app.get("/api/users", async (req, res) => {
   return res.json(users);
 });
 
+app.post("/api/users/:_id/exercises",(req,res)=>{
+    const db = await connectToDatabase();
+  const collection = db.collection("Exce");
+});
+
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
 });

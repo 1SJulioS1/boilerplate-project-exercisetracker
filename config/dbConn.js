@@ -14,7 +14,7 @@ const connectToDatabase = async () => {
 
   try {
     await client.connect();
-    _db = client.db("Users");
+    _db = client.db("Exercise tracker");
     console.log("MongoDB connection established");
   } catch (e) {
     console.error(e);
