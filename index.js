@@ -50,6 +50,7 @@ app.get("/api/users", async (req, res) => {
 app.post("/api/users/:_id/exercises", async (req, res) => {
   const db = await connectToDatabase();
   const log = db.collection("Log");
+  const user = db.collection("Users");
   if (!req?.params?._id || !req?.body?.description || !req?.body?.duration) {
     return res.status(400).json({ message: "Form data needed" });
   }
