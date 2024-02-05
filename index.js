@@ -49,7 +49,7 @@ app.get("/api/users", async (req, res) => {
 
 app.post("/api/users/:_id/exercises", async (req, res) => {
   const db = await connectToDatabase();
-  const user = db.collection("Users");
+  const log = db.collection("Log");
   if (!req?.params?._id || !req?.body?.description || !req?.body?.duration) {
     return res.status(400).json({ message: "Form data needed" });
   }
@@ -60,43 +60,48 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     const date = !req?.body?.date
       ? new Date().toDateString()
       : new Date(req.body.date).toDateString();
-    const newExercise = await user
-      .findOneAndUpdate(
-        {
-          _id: new ObjectId(req.params._id),
-        },
-        {
-          $push: {
+    const newExercise = await log.insertOne({
+      _id: new ObjectId(req.params._id),
+      username: result.username,
+      description,
+      duration,
+      date,
+      /*          $push: {
             log: {
               description: req.body.description,
               duration: Number(req.body.duration),
               date: date,
             },
-          },
-          $inc: {
-            count: 1,
-          },
-        },
-        { new: true }
-      )
-      .then((data) => {
+          }, */
+      /* $inc: {
+        count: 1,
+      }, */
+    });
+    return res.send(200).json({
+      _id: req.params.idm,
+      username: result.username,
+      description,
+      duration,
+      date,
+    });
+    /* .then((data) => {
         res.send({
           username: data.username,
           date: new Date(date).toDateString(),
           description: req.body.description,
           duration: Number(req.body.duration),
           _id: req.params._id,
-        });
-      });
+        }); */
   } else {
     return res
       .status(404)
       .json({ message: `No user with id: ${req.params.id}` });
   }
 });
-app.get("/api/users/:_id/logs", async (req, res) => {
+/* app.get("/api/users/:_id/logs", async (req, res) => {
   const db = await connectToDatabase();
   const user = db.collection("Users");
+  const log = db.collection("Log");
   let from = req.query.from || 0;
   let to = req.query.to || Date.now();
   let limit = Number(req.query.limit) || 0;
@@ -129,6 +134,6 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     }
   }
 });
-const listener = app.listen(process.env.PORT || 3000, () => {
+ */ const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
 });
