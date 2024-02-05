@@ -49,7 +49,6 @@ app.get("/api/users", async (req, res) => {
 
 app.post("/api/users/:_id/exercises", async (req, res) => {
   const db = await connectToDatabase();
-  const exercise = db.collection("Exercise");
   const user = db.collection("Users");
   if (!req?.params?._id || !req?.body?.description || !req?.body?.duration) {
     return res.status(400).json({ message: "Form data needed" });
@@ -74,10 +73,9 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
               date: date,
             },
           },
-          /* username: result.username,
-        description: req.body.description,
-        duration: parseInt(req.body.duration),
-        date, */
+          $inc: {
+            count: 1,
+          },
         },
         { new: true }
       )
@@ -90,17 +88,47 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
           _id: req.params._id,
         });
       });
-    /* const insertedExercise = await exercise.findOne({
-      _id: newExercise.insertedId,
-    });
-    res.status(200).json(insertedExercise); */
   } else {
     return res
       .status(404)
       .json({ message: `No user with id: ${req.params.id}` });
   }
 });
-
+app.get("/api/users/:_id/logs", async (req, res) => {
+  const db = await connectToDatabase();
+  const user = db.collection("Users");
+  let from = req.query.from || 0;
+  let to = req.query.to || Date.now();
+  let limit = Number(req.query.limit) || 0;
+  if (!req?.params?._id) {
+    return res.status(400).json({ message: "User id needed" });
+  } else {
+    const result = await user
+      .findOne({
+        _id: new ObjectId(req.params._id),
+        "log.date": { $gte: new Date(from), $lte: new Date(to) },
+      })
+      .limit(limit);
+    if (result) {
+      let exercises = result.map((log) => {
+        return {
+          description: log.description,
+          duration: log.duration,
+          date: log.date.toDateString(),
+        };
+      });
+      let count = exercises.length;
+      let user = await collection.findOne({ _id });
+      let response = {
+        _id: user._id,
+        username: user.username,
+        count,
+        log: exercises,
+      };
+      res.status(200).json(response);
+    }
+  }
+});
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
 });
