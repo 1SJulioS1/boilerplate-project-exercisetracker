@@ -104,7 +104,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     return res.status(400).json({ message: "User id needed" });
   } else {
     const result = await user
-      .findOne({
+      .find({
         _id: new ObjectId(req.params._id),
         "log.date": { $gte: new Date(from), $lte: new Date(to) },
       })
