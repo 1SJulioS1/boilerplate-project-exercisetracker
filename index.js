@@ -49,7 +49,6 @@ app.get("/api/users", async (req, res) => {
 
 app.post("/api/users/:_id/exercises", async (req, res) => {
   const db = await connectToDatabase();
-  const log = db.collection("Log");
   const user = db.collection("Users");
   if (!req?.params?._id || !req?.body?.description || !req?.body?.duration) {
     return res.status(400).json({ message: "Form data needed" });
@@ -61,38 +60,33 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     const date = !req?.body?.date
       ? new Date().toDateString()
       : new Date(req.body.date).toDateString();
-    const newExercise = await log.insertOne({
-      _id: new ObjectId(req.params._id),
-      username: result.username,
-      description,
-      duration,
-      date,
-      /*          $push: {
+    const newExercise = await user
+      .findOneAndUpdate(
+        {
+          _id: new ObjectId(req.params._id),
+        },
+        {
+          $push: {
             log: {
               description: req.body.description,
               duration: Number(req.body.duration),
               date: date,
             },
-          }, */
-      /* $inc: {
-        count: 1,
-      }, */
-    });
-    return res.send(200).json({
-      _id: req.params.idm,
-      username: result.username,
-      description,
-      duration,
-      date,
-    });
-    /* .then((data) => {
+          },
+          $inc: {
+            count: 1,
+          },
+        }
+      )
+      .then((newExercise) => {
         res.send({
-          username: data.username,
-          date: new Date(date).toDateString(),
+          username: newExercise.username,
           description: req.body.description,
           duration: Number(req.body.duration),
+          date,
           _id: req.params._id,
-        }); */
+        });
+      });
   } else {
     return res
       .status(404)
@@ -102,39 +96,20 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
 /* app.get("/api/users/:_id/logs", async (req, res) => {
   const db = await connectToDatabase();
   const user = db.collection("Users");
-  const log = db.collection("Log");
   let from = req.query.from || 0;
   let to = req.query.to || Date.now();
   let limit = Number(req.query.limit) || 0;
   if (!req?.params?._id) {
     return res.status(400).json({ message: "User id needed" });
   } else {
-    const result = await user
-      .find({
-        _id: new ObjectId(req.params._id),
-        "log.date": { $gte: new Date(from), $lte: new Date(to) },
-      })
-      .limit(limit);
+    const result = await user.findOne({
+      _id: new ObjectId(req.params._id),
+    });
     if (result) {
-      let exercises = result.map((log) => {
-        return {
-          description: log.description,
-          duration: log.duration,
-          date: log.date.toDateString(),
-        };
-      });
-      let count = exercises.length;
-      let user = await user.findOne({ _id });
-      let response = {
-        _id: user._id,
-        username: user.username,
-        count,
-        log: exercises,
-      };
-      res.status(200).json(response);
+      return res.json(result.log);
     }
   }
-});
- */ const listener = app.listen(process.env.PORT || 3000, () => {
+}); */
+const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
 });
