@@ -59,7 +59,12 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
   if (result) {
     const date = !req?.body?.date
       ? new Date().toDateString()
-      : new Date(req.body.date).toDateString();
+      : new Date(req.body.date)
+          .toUTCString()
+          .split(" ")
+          .slice(0, 4)
+          .join(" ")
+          .replace(",", "");
     const newExercise = await user
       .findOneAndUpdate(
         {
