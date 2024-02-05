@@ -87,7 +87,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
           date: new Date(date).toDateString(),
           description: req.body.description,
           duration: Number(req.body.duration),
-          _id: id,
+          _id: req.params._id,
         });
       });
     /* const insertedExercise = await exercise.findOne({
