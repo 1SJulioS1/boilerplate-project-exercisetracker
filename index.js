@@ -118,7 +118,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
         };
       });
       let count = exercises.length;
-      let user = await collection.findOne({ _id });
+      let user = await user.findOne({ _id });
       let response = {
         _id: user._id,
         username: user.username,
