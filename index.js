@@ -54,54 +54,50 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
   if (!req?.params?._id || !req?.body?.description || !req?.body?.duration) {
     return res.status(400).json({ message: "Form data needed" });
   }
-  if (ObjectId.isValid(_id)) {
-    const result = await user.findOne({
-      _id: new ObjectId(req.params._id),
-    });
-    if (result) {
-      const date = !req?.body?.date
-        ? new Date().toDateString()
-        : new Date(req.body.date).toDateString();
-      const newExercise = await user
-        .findOneAndUpdate(
-          {
-            _id: new ObjectId(req.params._id),
-          },
-          {
-            $push: {
-              log: {
-                description: req.body.description,
-                duration: Number(req.body.duration),
-                date: date,
-              },
+  const result = await user.findOne({
+    _id: new ObjectId(req.params._id),
+  });
+  if (result) {
+    const date = !req?.body?.date
+      ? new Date().toDateString()
+      : new Date(req.body.date).toDateString();
+    const newExercise = await user
+      .findOneAndUpdate(
+        {
+          _id: new ObjectId(req.params._id),
+        },
+        {
+          $push: {
+            log: {
+              description: req.body.description,
+              duration: Number(req.body.duration),
+              date: date,
             },
-            /* username: result.username,
+          },
+          /* username: result.username,
         description: req.body.description,
         duration: parseInt(req.body.duration),
         date, */
-          },
-          { new: true }
-        )
-        .then((data) => {
-          res.send({
-            username: data.username,
-            date: new Date(date).toDateString(),
-            description: req.body.description,
-            duration: Number(req.body.duration),
-            _id: id,
-          });
+        },
+        { new: true }
+      )
+      .then((data) => {
+        res.send({
+          username: data.username,
+          date: new Date(date).toDateString(),
+          description: req.body.description,
+          duration: Number(req.body.duration),
+          _id: id,
         });
-      /* const insertedExercise = await exercise.findOne({
+      });
+    /* const insertedExercise = await exercise.findOne({
       _id: newExercise.insertedId,
     });
     res.status(200).json(insertedExercise); */
-    } else {
-      return res
-        .status(404)
-        .json({ message: `No user with id: ${req.params.id}` });
-    }
   } else {
-    res.json({ error: "NOT VALID _ID" });
+    return res
+      .status(404)
+      .json({ message: `No user with id: ${req.params.id}` });
   }
 });
 
