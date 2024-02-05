@@ -57,19 +57,8 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     _id: new ObjectId(req.params._id),
   });
   if (result) {
-    const date = !req?.body?.date
-      ? new Date()
-          .toUTCString()
-          .split(" ")
-          .slice(0, 4)
-          .join(" ")
-          .replace(",", "")
-      : new Date(req.body.date)
-          .toUTCString()
-          .split(" ")
-          .slice(0, 4)
-          .join(" ")
-          .replace(",", "");
+    const date = !req?.body?.date ? new Date() : new Date(req.body.date);
+    /* console.log(new Date(req.body.date).toISOString()); */
     const newExercise = await user
       .findOneAndUpdate(
         {
@@ -93,7 +82,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
           username: newExercise.username,
           description: req.body.description,
           duration: Number(req.body.duration),
-          date,
+          date: date.toDateString(),
           _id: req.params._id,
         });
       });
