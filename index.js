@@ -58,7 +58,13 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
   });
   if (result) {
     const date = !req?.body?.date
-      ? new Date().toDateString()
+      ? new Date()
+          .toDateString()
+          .toUTCString()
+          .split(" ")
+          .slice(0, 4)
+          .join(" ")
+          .replace(",", "")
       : new Date(req.body.date)
           .toUTCString()
           .split(" ")
