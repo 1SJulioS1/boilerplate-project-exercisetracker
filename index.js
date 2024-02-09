@@ -110,9 +110,14 @@ app.get("/api/users/:_id/logs", async (req, res) => {
       _id: new ObjectId(req.params._id),
     });
     if (resultUser) {
-      var filteredLog = resultUser.log.filter((entry) => {
-        return entry.date >= new Date(from) && entry.date <= new Date(to);
-      });
+      var filteredLog = resultUser.log
+        .filter((entry) => {
+          return entry.date >= new Date(from) && entry.date <= new Date(to);
+        })
+        .map((entry) => {
+          entry.date = entry.date.toDateString();
+          return entry;
+        });
       if (limit) {
         filteredLog = filteredLog.slice(0, limit);
       }
