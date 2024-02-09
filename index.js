@@ -58,57 +58,74 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
   });
   if (result) {
     const date = !req?.body?.date ? new Date() : new Date(req.body.date);
-    /* console.log(new Date(req.body.date).toISOString()); */
-    const newExercise = await user
-      .findOneAndUpdate(
+
+    if (user) {
+      const newExercise = user.updateOne(
         {
           _id: new ObjectId(req.params._id),
         },
         {
-          $push: {
-            log: {
-              description: req.body.description,
-              duration: Number(req.body.duration),
-              date: date,
-            },
-          },
           $inc: {
             count: 1,
           },
+          $push: {
+            log: {
+              $each: [
+                {
+                  description: req.body.description,
+                  duration: Number(req.body.duration),
+                  date,
+                },
+              ],
+            },
+          },
         }
-      )
-      .then((newExercise) => {
-        res.send({
-          username: newExercise.username,
-          description: req.body.description,
-          duration: Number(req.body.duration),
-          date: date.toDateString(),
-          _id: req.params._id,
-        });
+      );
+
+      return res.send({
+        username: result.username,
+        description: req.body.description,
+        duration: Number(req.body.duration),
+        date: date.toDateString(),
+        _id: req.params._id,
       });
+    }
   } else {
     return res
       .status(404)
       .json({ message: `No user with id: ${req.params.id}` });
   }
 });
-/* app.get("/api/users/:_id/logs", async (req, res) => {
+app.get("/api/users/:_id/logs", async (req, res) => {
   const db = await connectToDatabase();
   const user = db.collection("Users");
+  const log = db.collection("Log");
   let from = req.query.from || 0;
   let to = req.query.to || Date.now();
   let limit = Number(req.query.limit) || 0;
   if (!req?.params?._id) {
     return res.status(400).json({ message: "User id needed" });
   } else {
-    const result = await user.findOne({
+    const resultUser = await user.findOne({
       _id: new ObjectId(req.params._id),
     });
-    if (result) {
-      return res.json(result.log);
+    if (resultUser) {
+      var filteredLog = resultUser.log.filter((entry) => {
+        return entry.date >= new Date(from) && entry.date <= new Date(to);
+      });
+      if (limit) {
+        filteredLog = filteredLog.slice(0, limit);
+      }
+
+      resultUser.log = filteredLog;
+      return res.send(resultUser);
+    } else {
+      return res
+        .status(404)
+        .json({ message: `No user with id: ${req.params.id}` });
     }
   }
-}); */
+});
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
 });
